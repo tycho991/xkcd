@@ -1,0 +1,25 @@
+#!/bin/bash
+
+LIMIT=$(lynx -dump http://xkcd.com/ | grep http://xkcd.com/ | cut -d / -f 4 | head -n1)
+let RAND=$RANDOM%$LIMIT+1;
+
+while getopts "n:r" options; do
+  case $options in
+    n ) echo "Nummer "$OPTARG "wird angezeigt"
+	eog $(lynx -dump http://xkcd.com/$OPTARG | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
+	exit 0
+	;;
+    r ) echo "Randomize! Nummer "$RAND" wird angezeigt";
+	eog $(lynx -dump http://xkcd.com/$RAND | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
+        exit 0
+        ;;
+   \? ) echo "Ungültige Option"
+        exit 1
+        ;;
+  esac
+done
+
+echo "Randomize! Nummer "$RAND" wird angezeigt";
+eog $(lynx -dump http://xkcd.com/$RAND | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
+exit 0
+
