@@ -1,16 +1,33 @@
 #!/bin/bash
 
-LIMIT=$(lynx -dump http://xkcd.com/ | grep http://xkcd.com/ | cut -d / -f 4 | head -n1)
-let RAND=$RANDOM%$LIMIT+1;
+function get_imgurl {
+wget -qO- http://xkcd.com/$1 | grep '<img src="http://imgs.xkcd.com/comics/' | cut -d'"' -f2
+}
+
+function get_imgtitle {
+wget -qO- http://xkcd.com/$1 | grep '<img src="http://imgs.xkcd.com/comics/' | cut -d'"' -f6
+}
+
+function get_imgsubtext {
+wget -qO- http://xkcd.com/$1 | grep '<img src="http://imgs.xkcd.com/comics/' | cut -d'"' -f4
+}
+
+function get_limit {
+wget -qO- http://xkcd.com | grep 'Permanent link to this comic: http://xkcd.com' | cut -d/ -f4
+}
+
+function get_rand {
+echo $((($RANDOM % $(wget -qO- http://xkcd.com | grep 'Permanent link to this comic: http://xkcd.com' | cut -d/ -f4)) + 1))
+}
 
 while getopts "n:r" options; do
   case $options in
     n ) echo "Nummer "$OPTARG "wird angezeigt"
-	eog $(lynx -dump http://xkcd.com/$OPTARG | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
-	exit 0
-	;;
-    r ) echo "Randomize! Nummer "$RAND" wird angezeigt";
-	eog $(lynx -dump http://xkcd.com/$RAND | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
+        eog $(get_imgurl $OPTARG) >/dev/null 2>&1;
+        exit 0
+        ;;
+    r ) echo "Randomize! Nummer "$(get_rand)" wird angezeigt";
+        eog $(get_imgurl $(get_rand)) >/dev/null 2>&1;
         exit 0
         ;;
    \? ) echo "Ungültige Option"
@@ -19,7 +36,6 @@ while getopts "n:r" options; do
   esac
 done
 
-echo "Randomize! Nummer "$RAND" wird angezeigt";
-eog $(lynx -dump http://xkcd.com/$RAND | grep http://imgs.xkcd.com/comics/) >/dev/null 2>&1;
+echo "Der aktuelle Comic Nummer "$(get_limit)" wird angezeigt";
+eog $(get_imgurl $(get_limit)) >/dev/null 2>&1;
 exit 0
-
